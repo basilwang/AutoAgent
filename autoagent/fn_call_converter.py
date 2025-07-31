@@ -39,13 +39,8 @@ You have access to the following functions:
 
 If you choose to call a function ONLY reply in the following format with NO suffix:
 
-<function=example_function_name>
-<parameter=example_parameter_1>value_1</parameter>
-<parameter=example_parameter_2>
-This is the value for the second parameter
-that can span
-multiple lines
-</parameter>
+<function=web_search>
+<parameter=query>search term</parameter>
 </function>
 
 <IMPORTANT>
