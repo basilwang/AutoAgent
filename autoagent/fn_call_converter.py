@@ -719,6 +719,14 @@ def convert_non_fncall_messages_to_fncall_messages(
 
                 # Parse parameters
                 param_matches = re.finditer(FN_PARAM_REGEX_PATTERN, fn_body, re.DOTALL)
+                
+                # Debug: Print function body and parameter matches
+                print(f"DEBUG: Function name: {fn_name}")
+                print(f"DEBUG: Function body: {fn_body}")
+                print(f"DEBUG: Parameter matches: {list(param_matches)}")
+                
+                # Re-find matches since we consumed the iterator above
+                param_matches = re.finditer(FN_PARAM_REGEX_PATTERN, fn_body, re.DOTALL)
                 params = _extract_and_validate_params(
                     matching_tool, param_matches, fn_name
                 )
