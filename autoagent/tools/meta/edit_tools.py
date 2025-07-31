@@ -13,16 +13,24 @@ from autoagent.tools.terminal_tools import (
     )
 from autoagent.registry import register_tool
 import json
+import os
 def get_metachain_path(env: Union[LocalEnv, DockerEnv]) -> str: 
+    # 首先尝试通过pip show获取路径
     result = env.run_command('pip show autoagent')
-    if result['status'] != 0:
-        raise Exception("Failed to list tools. Error: " + result['result'])
-    stdout = result['result']
-    for line in stdout.split('\n'):
-        if line.startswith('Editable project location:'):
-            path = line.split(':', 1)[1].strip()
-            return path
-    raise Exception("Failed to list tools. The MetaChain is not installed in editable mode.")
+    if result['status'] == 0:
+        stdout = result['result']
+        for line in stdout.split('\n'):
+            if line.startswith('Editable project location:'):
+                path = line.split(':', 1)[1].strip()
+                return path
+    
+    # 如果pip show失败，尝试获取当前工作目录
+    result = env.run_command('pwd')
+    if result['status'] == 0:
+        return result['result'].strip()
+    
+    # 如果都失败，返回默认路径
+    return os.getcwd()
 
 def protect_tools(tool_name: str):
     if tool_name in registry.tools_info.keys():
@@ -36,31 +44,14 @@ def list_tools(context_variables):
     Returns:
         A list of information of all plugin tools including name, args, docstring, body, return_type, file_path.
     """
-    env: Union[LocalEnv, DockerEnv] = context_variables.get("code_env", LocalEnv())
     try:
-        path = get_metachain_path(env)
+        # 直接在当前环境中导入registry并获取工具信息
+        from autoagent.registry import registry
+        import json
+        tools_info = registry.display_plugin_tools_info
+        return json.dumps(tools_info, indent=4)
     except Exception as e:
-        return "Failed to list tools. Error: " + str(e)
-    python_code = '"from autoagent.registry import registry; import json; print(\\"TOOL_LIST_START\\"); print(json.dumps(registry.display_plugin_tools_info, indent=4)); print(\\"TOOL_LIST_END\\")"'
-    list_tools_cmd = f"cd {path} && DEFAULT_LOG=False python -c {python_code}"
-    result = env.run_command(list_tools_cmd)
-    if result['status'] != 0:
-        return "Failed to list tools. Error: " + result['result']
-    try:
-        output = result['result']
-        start_marker = "TOOL_LIST_START"
-        end_marker = "TOOL_LIST_END"
-        start_idx = output.find(start_marker) + len(start_marker)
-        end_idx = output.find(end_marker)
-        
-        if start_idx == -1 or end_idx == -1:
-            return "Failed to parse tool list: markers not found"
-            
-        json_str = output[start_idx:end_idx].strip()
-        return json_str
-    except Exception as e:
-        return f"Failed to process output: {str(e)}"
-    # return result['result']
+        return f"Failed to list tools. Error: {str(e)}"
 def check_tool_name(tool_name: str):
     if tool_name == "visual_question_answering":
         raise Exception("The tool `visual_question_answering` is not allowed to be modified. Directly use the `visual_question_answering` tool to handlen ANY visual tasks.")

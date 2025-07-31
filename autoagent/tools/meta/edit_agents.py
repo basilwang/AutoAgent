@@ -25,30 +25,14 @@ def list_agents(context_variables):
     Returns:
         A list of information of all plugin agents including name, args, docstring, body, return_type, file_path.
     """
-    env: Union[LocalEnv, DockerEnv] = context_variables.get("code_env", LocalEnv())
     try:
-        path = get_metachain_path(env)
+        # 直接在当前环境中导入registry并获取代理信息
+        from autoagent.registry import registry
+        import json
+        agents_info = registry.display_plugin_agents_info
+        return json.dumps(agents_info, indent=4)
     except Exception as e:
-        return "[ERROR] Failed to list agents. Error: " + str(e)
-    python_code = '"from autoagent.registry import registry; import json; print(\\"AGENT_LIST_START\\"); print(json.dumps(registry.display_plugin_agents_info, indent=4)); print(\\"AGENT_LIST_END\\")"'
-    list_agents_cmd = f"cd {path} && DEFAULT_LOG=False python -c {python_code}"
-    result = env.run_command(list_agents_cmd)
-    if result['status'] != 0:
-        return "[ERROR] Failed to list agents. Error: " + result['result']
-    try:
-        output = result['result']
-        start_marker = "AGENT_LIST_START"
-        end_marker = "AGENT_LIST_END"
-        start_idx = output.find(start_marker) + len(start_marker)
-        end_idx = output.find(end_marker)
-        
-        if start_idx == -1 or end_idx == -1:
-            return "[ERROR] Failed to parse agent list: markers not found"
-            
-        json_str = output[start_idx:end_idx].strip()
-        return json_str
-    except Exception as e:
-        return f"[ERROR] Failed to process output: {str(e)}"
+        return f"[ERROR] Failed to list agents. Error: {str(e)}"
 
 
 @register_tool("delete_agent")
