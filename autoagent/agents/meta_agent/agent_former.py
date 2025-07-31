@@ -73,6 +73,10 @@ def get_agent_former_agent(model: str) -> str:
   * system_input应该描述完整的输入空间
   * 每个agent_input应该指定它处理的system_input的子集
   * system_output应该表示统一的响应格式
+- 您必须直接输出XML格式的表单，不要包含任何解释性文本、思考过程或额外说明
+- 不要使用<think>标签或任何其他非XML内容
+- 只输出从<agents>开始到</agents>结束的完整XML结构
+- 确保XML格式正确，可以被解析器正确解析
 """ + \
 f"""
 您可以使用的现有工具是： 
