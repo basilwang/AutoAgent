@@ -2,6 +2,7 @@ from autoagent.registry import register_agent
 from autoagent.tools.meta.edit_agents import list_agents, create_agent, delete_agent, run_agent, read_agent, create_orchestrator_agent
 from autoagent.tools.meta.edit_tools import list_tools, create_tool, delete_tool, run_tool
 from autoagent.tools.terminal_tools import execute_command, terminal_page_down, terminal_page_up, terminal_page_to
+from autoagent.tools.web_tools import web_search
 from autoagent.types import Agent
 from autoagent.io_utils import read_file
 
@@ -36,6 +37,9 @@ AVAILABLE FUNCTIONS:
    - terminal_page_up: Move the terminal page up when the terminal output is too long.
    - terminal_page_to: Move the terminal page to the specific page when the terminal output is too long, and you want to move to the specific page with the meaningful content.
 
+3. Web Tools:
+   - web_search: Search the web for information using specified keywords and filters.
+
 WORKFLOW GUIDELINES:
 
 1. Single Agent Implementation:
@@ -65,7 +69,7 @@ BEST PRACTICES:
 
 Remember: Your success is measured by both the accurate creation of agents and their effective execution of the given tasks.
 """
-    tool_list = [list_agents, create_agent, delete_agent, run_agent, execute_command, read_agent, create_orchestrator_agent, terminal_page_down, terminal_page_up, terminal_page_to]
+    tool_list = [list_agents, create_agent, delete_agent, run_agent, execute_command, read_agent, create_orchestrator_agent, terminal_page_down, terminal_page_up, terminal_page_to, web_search]
     return Agent(
         name="Agent Creator Agent", 
         model=model, 
