@@ -236,6 +236,7 @@ r"""
         name = "Agent Former Agent",
         model = model,
         instructions = instructions,
+        tool_choice = "required",
     )
 
 if __name__ == "__main__":
