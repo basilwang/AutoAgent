@@ -503,9 +503,12 @@ def _extract_and_validate_params(
 
     # Collect parameters
     found_params = set()
+    print(f"DEBUG: Required params: {required_params}")
+    print(f"DEBUG: Allowed params: {allowed_params}")
     for param_match in param_matches:
         param_name = param_match.group(1)
         param_value = param_match.group(2).strip()
+        print(f"DEBUG: Found param - name: '{param_name}', value: '{param_value}'")
 
         # Validate parameter is allowed
         if allowed_params and param_name not in allowed_params:
@@ -547,9 +550,12 @@ def _extract_and_validate_params(
 
         params[param_name] = param_value
         found_params.add(param_name)
+        print(f"DEBUG: Added param '{param_name}' = '{param_value}'")
 
     # Check all required parameters are present
     missing_params = required_params - found_params
+    print(f"DEBUG: Found params: {found_params}")
+    print(f"DEBUG: Missing params: {missing_params}")
     if missing_params:
         raise FunctionCallValidationError(
             f"Missing required parameters for function '{fn_name}': {missing_params}"
