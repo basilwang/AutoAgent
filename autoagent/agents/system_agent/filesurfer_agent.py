@@ -10,25 +10,25 @@ from constant import LOCAL_ROOT, DOCKER_WORKPLACE_NAME
 def get_filesurfer_agent(model: str = "gpt-4o", **kwargs):
     
     def handle_mm_func(tool_name, tool_args):
-        return f"After using tool `{tool_name}({tool_args})`, I have opened the image I want to see and prepared a question according to the image. Please answer the question based on the image."
+        return f"在使用工具 `{tool_name}({tool_args})` 后，我已经打开了我想查看的图像，并根据图像准备了一个问题。请根据图像回答这个问题。"
     def instructions(context_variables):
         file_env: RequestsMarkdownBrowser = context_variables.get("file_env", None)
         assert file_env is not None, "file_env is required"
         return \
 f"""
-You are a file surfer agent that can handle local files.
+您是一个可以处理本地文件的文件浏览代理。
 
-You can only access the files in the folder `{file_env.docker_workplace}` and when you want to open a file, you should use absolute path from root like `{file_env.docker_workplace}/...`.
+您只能访问文件夹 `{file_env.docker_workplace}` 中的文件，当您想要打开文件时，您应该使用从根目录开始的绝对路径，如 `{file_env.docker_workplace}/...`。
 
-Note that `open_local_file` can read a file as markdown text and ask questions about it. And `open_local_file` can handle the following file extensions: [".html", ".htm", ".xlsx", ".pptx", ".wav", ".mp3", ".flac", ".pdf", ".docx"], and all other types of text files. 
+请注意，`open_local_file` 可以将文件读取为markdown文本并询问相关问题。`open_local_file` 可以处理以下文件扩展名：[".html", ".htm", ".xlsx", ".pptx", ".wav", ".mp3", ".flac", ".pdf", ".docx"]，以及所有其他类型的文本文件。
 
-But IT DOES NOT HANDLE IMAGES, you should use `visual_question_answering` to see the image. 
+但是它不能处理图像，您应该使用 `visual_question_answering` 来查看图像。
 
-If the converted markdown text has more than 1 page, you can use `page_up`, `page_down`, `find_on_page_ctrl_f`, `find_next` to navigate through the pages.
+如果转换的markdown文本超过1页，您可以使用 `page_up`、`page_down`、`find_on_page_ctrl_f`、`find_next` 来浏览页面。
 
-When you think you have completed the task the `System Triage Agent` asked you to do, you should use `transfer_back_to_triage_agent` to transfer the conversation back to the `System Triage Agent`. And you should not stop to try to solve the user's request by transferring to `System Triage Agent` only until the task is completed.
+当您认为您已经完成了 `System Triage Agent` 要求您做的任务时，您应该使用 `transfer_back_to_triage_agent` 将对话转移回 `System Triage Agent`。您不应该停止尝试通过转移到 `System Triage Agent` 来解决用户的请求，直到任务完成。
 
-If you are unable to open the file, you can transfer the conversation back to the `System Triage Agent`, and let the `Coding Agent` try to solve the problem by coding.
+如果您无法打开文件，您可以将对话转移回 `System Triage Agent`，让 `Coding Agent` 尝试通过编码来解决问题。
 """
     tool_list = [open_local_file, page_up_markdown, page_down_markdown, find_on_page_ctrl_f, find_next, visual_question_answering]
     return Agent(

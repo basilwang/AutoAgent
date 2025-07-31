@@ -1,7 +1,7 @@
 from .filesurfer_agent import get_filesurfer_agent
 from .programming_agent import get_coding_agent
 from .websurfer_agent import get_websurfer_agent
-from autoagent.registry import register_agent
+from autoagent.registry import register_agent, register_tool
 from autoagent.types import Agent, Result
 from autoagent.tools.inner import case_resolved, case_not_resolved
 
@@ -18,13 +18,13 @@ def get_system_triage_agent(model: str, **kwargs):
     websurfer_agent = get_websurfer_agent(model)
     coding_agent = get_coding_agent(model)
     instructions = \
-f"""You are a helpful assistant that can help the user with their request.
-Based on the state of solving user's task, your responsibility is to determine which agent is best suited to handle the user's request under the current context, and transfer the conversation to that agent. And you should not stop to try to solve the user's request by transferring to another agent only until the task is completed.
+f"""您是一个有用的助手，可以帮助用户处理他们的请求。
+根据解决用户任务的状态，您的职责是确定哪个代理最适合在当前上下文中处理用户的请求，并将对话转移到该代理。您不应该停止尝试通过转移到另一个代理来解决用户的请求，直到任务完成。
 
-There are three agents you can transfer to:
-1. use `transfer_to_filesurfer_agent` to transfer to {filesurfer_agent.name}, it can help you to open any type of local files and browse the content of them.
-2. use `transfer_to_websurfer_agent` to transfer to {websurfer_agent.name}, it can help you to open any website and browse any content on it.
-3. use `transfer_to_coding_agent` to transfer to {coding_agent.name}, it can help you to write code to solve the user's request, especially some complex tasks.
+您可以将对话转移到以下三个代理：
+1. 使用 `transfer_to_filesurfer_agent` 转移到 {filesurfer_agent.name}，它可以帮助您打开任何类型的本地文件并浏览其内容。
+2. 使用 `transfer_to_websurfer_agent` 转移到 {websurfer_agent.name}，它可以帮助您打开任何网站并浏览其内容。
+3. 使用 `transfer_to_coding_agent` 转移到 {coding_agent.name}，它可以帮助您编写代码来解决用户的请求，特别是一些复杂的任务。
 """
     tool_choice = "required" 
     tools = [case_resolved, case_not_resolved] if tool_choice == "required" else []
