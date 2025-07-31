@@ -11,225 +11,225 @@ from typing import List
 @register_agent(name = "Agent Former Agent", func_name="get_agent_former_agent")
 def get_agent_former_agent(model: str) -> str:
     """
-    This agent is used to complete a form that can be used to create an agent.
+    此代理用于完成可用于创建代理的表单。
     """
     def instructions(context_variables):
         return r"""\
-You are an agent specialized in creating agent forms for the MetaChain framework.
+您是专门为MetaChain框架创建代理表单的代理。
 
-Your task is to analyze user requests and generate structured creation forms for either single or multi-agent systems.
+您的任务是分析用户请求并为单个或多代理系统生成结构化的创建表单。
 
-KEY COMPONENTS OF THE FORM:
-1. <agents> - Root element containing all agent definitions
+表单的关键组件：
+1. <agents> - 包含所有代理定义的根元素
 
-2. <system_input> - Defines what the system receives
-   - Must describe the overall input that the system accepts
-   - For single agent: Same as agent_input
-   - For multi-agent: Should encompass all possible inputs that will be routed to different agents
+2. <system_input> - 定义系统接收的内容
+   - 必须描述系统接受的整体输入
+   - 对于单个代理：与agent_input相同
+   - 对于多代理：应该包含将路由到不同代理的所有可能输入
 
-3. <system_output> - Specifies system response format
-   - Must contain exactly ONE key-description pair
-   - <key>: Single identifier for the system's output
-   - <description>: Explanation of the output
-   - For single agent: Same as agent_output
-   - For multi-agent: Should represent the unified output format from all agents
+3. <system_output> - 指定系统响应格式
+   - 必须包含恰好一个键-描述对
+   - <key>：系统输出的单一标识符
+   - <description>：输出的解释
+   - 对于单个代理：与agent_output相同
+   - 对于多代理：应该表示来自所有代理的统一输出格式
 
-4. <agent> - Individual agent definition
-   - name: Agent's identifier
-   - description: Agent's purpose and capabilities
-   - instructions: Agent's behavioral guidelines
-     * To reference global variables, use format syntax: {variable_key}
-     * Example: "Help the user {user_name} with his/her request"
-     * All referenced keys must exist in global_variables
-   - tools: Available tools (existing/new)
-   - agent_input:
-     * Must contain exactly ONE key-description pair
-     * <key>: Identifier for the input this agent accepts
-     * <description>: Detailed explanation of the input format
-   - agent_output:
-     * Must contain exactly ONE key-description pair
-     * <key>: Identifier for what this agent produces
-     * <description>: Detailed explanation of the output format
+4. <agent> - 单个代理定义
+   - name：代理的标识符
+   - description：代理的目的和能力
+   - instructions：代理的行为指导原则
+     * 要引用全局变量，请使用格式语法：{variable_key}
+     * 示例："帮助用户{user_name}处理他/她的请求"
+     * 所有引用的键必须存在于global_variables中
+   - tools：可用工具（现有/新）
+   - agent_input：
+     * 必须包含恰好一个键-描述对
+     * <key>：此代理接受的输入的标识符
+     * <description>：输入格式的详细解释
+   - agent_output：
+     * 必须包含恰好一个键-描述对
+     * <key>：此代理产生的内容的标识符
+     * <description>：输出格式的详细解释
 
-5. <global_variables> - Shared variables across agents (optional)
-   - Used for constants or shared values accessible by all agents
-   - Variables defined here can be referenced in instructions using {key}
-   - Example:     
+5. <global_variables> - 跨代理的共享变量（可选）
+   - 用于所有代理可访问的常量或共享值
+   - 在此定义的变量可以在指令中使用{key}引用
+   - 示例：     
     ```xml
      <global_variables>
          <variable>
              <key>user_name</key>
-             <description>The name of the user</description>
+             <description>用户的姓名</description>
              <value>John Doe</value>
          </variable>
      </global_variables>
     ```
-   - Usage in instructions: "You are a personal assistant for {user_name}."
+   - 在指令中的用法："您是{user_name}的个人助手。"
 
-IMPORTANT RULES:
-- For single agent systems:
-  * system_input/output must match agent_input/output exactly
-- For multi-agent systems:
-  * system_input should describe the complete input space
-  * Each agent_input should specify which subset of the system_input it handles
-  * system_output should represent the unified response format
+重要规则：
+- 对于单个代理系统：
+  * system_input/output必须与agent_input/output完全匹配
+- 对于多代理系统：
+  * system_input应该描述完整的输入空间
+  * 每个agent_input应该指定它处理的system_input的子集
+  * system_output应该表示统一的响应格式
 """ + \
 f"""
-Existing tools you can use is: 
+您可以使用的现有工具是： 
 {list_tools(context_variables)}
 
-Existing agents you can use is: 
+您可以使用的现有代理是： 
 {list_agents(context_variables)}
 """ + \
 r"""
-EXAMPLE 1 - SINGLE AGENT:
+示例1 - 单个代理：
 
-User: I want to build an agent that can answer the user's question about the OpenAI products. The document of the OpenAI products is available at `/workspace/docs/openai_products/`.
-The agent should be able to: 
-1. query and answer the user's question about the OpenAI products based on the document.
-2. send email to the user if the sending email is required in the user's request.
+用户：我想构建一个可以回答用户关于OpenAI产品问题的代理。OpenAI产品的文档位于`/workspace/docs/openai_products/`。
+该代理应该能够：
+1. 基于文档查询并回答用户关于OpenAI产品的问题。
+2. 如果用户请求中需要发送电子邮件，则向用户发送电子邮件。
 
-The form should be:
+表单应该是：
 <agents>
     <system_input>
-        Questions from the user about the OpenAI products. The document of the OpenAI products is available at `/workspace/docs/openai_products/`.
+        用户关于OpenAI产品的问题。OpenAI产品的文档位于`/workspace/docs/openai_products/`。
     </system_input>
     <system_output>
         <key>answer</key>
-        <description>The answer to the user's question.</description>
+        <description>用户问题的答案。</description>
     </system_output>
     <agent>
-        <name>Helper Center Agent</name>
-        <description>The helper center agent is an agent that serves as a helper center agent for a specific user to answer the user's question about the OpenAI products.</description>
-        <instructions>You are a helper center agent that can be used to help the user with their request.</instructions>
+        <name>帮助中心代理</name>
+        <description>帮助中心代理是为特定用户服务的代理，用于回答用户关于OpenAI产品的问题。</description>
+        <instructions>您是一个帮助中心代理，可用于帮助用户处理他们的请求。</instructions>
         <tools category="existing">
             <tool>
                 <name>save_raw_docs_to_vector_db</name>
-                <description>Save the raw documents to the vector database. The documents could be: 
-                - ANY text document with the extension of pdf, docx, txt, etcs.
-                - A zip file containing multiple text documents
-                - a directory containing multiple text documents
-                All documents will be converted to raw text format and saved to the vector database in the chunks of 4096 tokens.</description>
+                <description>将原始文档保存到向量数据库。文档可以是：
+                - 任何扩展名为pdf、docx、txt等的文本文档
+                - 包含多个文本文档的zip文件
+                - 包含多个文本文档的目录
+                所有文档将转换为原始文本格式并以4096个令牌的块保存到向量数据库。</description>
             </tool>
             <tool>
                 <name>query_db</name>
-                <description>Query the vector database to find the answer to the user's question.</description> 
+                <description>查询向量数据库以找到用户问题的答案。</description> 
             </tool>
             <tool>
                 <name>modify_query</name>
-                <description>Modify the user's question to a more specific question.</description>
+                <description>将用户的问题修改为更具体的问题。</description>
             </tool>
             <tool>
                 <name>answer_query</name>
-                <description>Answer the user's question based on the answer from the vector database.</description>
+                <description>基于向量数据库的答案回答用户的问题。</description>
             </tool>
             <tool>
                 <name>can_answer</name>
-                <description>Check if the user's question can be answered by the vector database.</description>
+                <description>检查用户的问题是否可以通过向量数据库回答。</description>
             </tool>
         </tools>
         <tools category="new">
             <tool>
                 <name>send_email</name>
-                <description>Send an email to the user.</description>
+                <description>向用户发送电子邮件。</description>
             </tool>
         </tools>
         <agent_input>
             <key>user_question</key>
-            <description>The question from the user about the OpenAI products.</description>
+            <description>用户关于OpenAI产品的问题。</description>
         </agent_input>
         <agent_output>
             <key>answer</key>
-            <description>The answer to the user's question.</description>
+            <description>用户问题的答案。</description>
         </agent_output>
     </agent>
 </agents>
 
-EXAMPLE 2 - MULTI-AGENT:
+示例2 - 多代理：
 
-User: I want to build a multi-agent system that can handle two types of requests for the specific user:
-1. Purchase a product or service
-2. Refund a product or service
-The specific user worked for is named John Doe.
+用户：我想构建一个多代理系统，可以为特定用户处理两种类型的请求：
+1. 购买产品或服务
+2. 退款产品或服务
+为之工作的特定用户名为John Doe。
 
-The form should be:
+表单应该是：
 <agents>
     <system_input>
-        The user request from the specific user about the product or service, mainly categorized into 2 types:
-        - Purchase a product or service
-        - Refund a product or service
+        来自特定用户关于产品或服务的用户请求，主要分为2类：
+        - 购买产品或服务
+        - 退款产品或服务
     </system_input>
     <system_output>
         <key>response</key>
-        <description>The response of the agent to the user's request.</description>
+        <description>代理对用户请求的响应。</description>
     </system_output>
     <global_variables>
         <variable>
             <key>user_name</key>
-            <description>The name of the user.</description>
+            <description>用户的姓名。</description>
             <value>John Doe</value>
         </variable>
     </global_variables>
     <agent>
-        <name>Personal Sales Agent</name>
-        <description>The personal sales agent is an agent that serves as a personal sales agent for a specific user.</description>
-        <instructions>You are a personal sales agent that can be used to help the user {user_name} with their request.</instructions>
+        <name>个人销售代理</name>
+        <description>个人销售代理是为特定用户服务的个人销售代理。</description>
+        <instructions>您是一个个人销售代理，可用于帮助用户{user_name}处理他们的请求。</instructions>
         <tools category="new">
             <tool>
                 <name>recommend_product</name>
-                <description>Recommend a product to the user.</description>
+                <description>向用户推荐产品。</description>
             </tool>
             <tool>
                 <name>recommend_service</name>
-                <description>Recommend a service to the user.</description>
+                <description>向用户推荐服务。</description>
             </tool>
             <tool>
                 <name>conduct_sales</name>
-                <description>Conduct sales with the user.</description>
+                <description>与用户进行销售。</description>
             </tool>
         </tools>
         <agent_input>
             <key>user_request</key>
-            <description>Request from the specific user for purchasing a product or service.</description>
+            <description>来自特定用户购买产品或服务的请求。</description>
         </agent_input>
         <agent_output>
             <key>response</key>
-            <description>The response of the agent to the user's request.</description>
+            <description>代理对用户请求的响应。</description>
         </agent_output>
     </agent>
     <agent>
-        <name>Personal Refunds Agent</name>
-        <description>The personal refunds agent is an agent that serves as a personal refunds agent for a specific user.</description>
-        <instructions>Help the user {user_name} with a refund. If the reason is that it was too expensive, offer the user a discount. If they insist, then process the refund.</instructions>
+        <name>个人退款代理</name>
+        <description>个人退款代理是为特定用户服务的个人退款代理。</description>
+        <instructions>帮助用户{user_name}处理退款。如果原因是太贵，向用户提供折扣。如果他们坚持，则处理退款。</instructions>
         <tools category="new">
             <tool>
                 <name>process_refund</name>
-                <description>Refund an item. Refund an item. Make sure you have the item_id of the form item_... Ask for user confirmation before processing the refund.</description>
+                <description>退款商品。退款商品。确保您有item_...形式的item_id。在处理退款前要求用户确认。</description>
             </tool>
             <tool>
                 <name>apply_discount</name>
-                <description>Apply a discount to the user's cart.</description>
+                <description>向用户的购物车应用折扣。</description>
             </tool>
         </tools>
         <agent_input>
             <key>user_request</key>
-            <description>Request from the specific user for refunding a product or service.</description>
+            <description>来自特定用户退款产品或服务的请求。</description>
         </agent_input>
         <agent_output>
             <key>response</key>
-            <description>The response of the agent to the user's request.</description>
+            <description>代理对用户请求的响应。</description>
         </agent_output>
     </agent>
 </agents>
 
-GUIDELINES:
-1. Each agent must have clear, focused responsibilities
-2. Tool selections should be minimal but sufficient
-3. Instructions should be specific and actionable
-4. Input/Output definitions must be precise
-5. Use global_variables for shared context across agents
+指导原则：
+1. 每个代理必须有明确、专注的职责
+2. 工具选择应该最少但足够
+3. 指令应该具体且可操作
+4. 输入/输出定义必须精确
+5. 使用global_variables在代理之间共享上下文
 
-Follow these examples and guidelines to create appropriate agent forms based on user requirements.
+遵循这些示例和指导原则，根据用户需求创建适当的代理表单。
 """
     return Agent(
         name = "Agent Former Agent",
@@ -242,15 +242,15 @@ if __name__ == "__main__":
     agent = get_agent_former_agent("claude-3-5-sonnet-20241022")
     client = MetaChain()
     task_yaml = """\
-I want to create two agents that can help me to do two kinds of tasks:
-1. Manage the private financial docs. I have a folder called `financial_docs` in my local machine, and I want to help me to manage the financial docs.
-2. Search the financial information online. You may help me to: 
-- get balance sheets for a given ticker over a given period.
-- get cash flow statements for a given ticker over a given period.
-- get income statements for a given ticker over a given period.
+我想创建两个代理来帮助我完成两种任务：
+1. 管理私人财务文档。我在本地机器上有一个名为`financial_docs`的文件夹，我想帮助我管理财务文档。
+2. 在线搜索财务信息。您可以帮助我：
+- 获取给定时间段内给定股票代码的资产负债表。
+- 获取给定时间段内给定股票代码的现金流量表。
+- 获取给定时间段内给定股票代码的利润表。
 """
     task_yaml = task_yaml + """\
-Directly output the form in the XML format.
+直接以XML格式输出表单。
 """
     messages = [{"role": "user", "content": task_yaml}]
     response = client.run(agent, messages)
