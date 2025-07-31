@@ -347,17 +347,23 @@ def web_search(context_variables, query: str):
     Args:
         query: The query to search for.
     """
+    print(f"DEBUG: web_search called with query: '{query}'")
     env: BrowserEnv = context_variables.get("web_env", None)
     assert env is not None, "web_env is not set"
     try:
         # 统一使用必应搜索，支持中英文
         action_str = f"_visit_page('https://www.bing.com/search?q={quote_plus(query)}&FORM=QBLH&hl=en')"
+        print(f"DEBUG: Executing action: {action_str}")
 
         obs = env.step(action_str)
         web_obs = to_web_obs(obs)
+        print(f"DEBUG: Web search completed, URL: {web_obs.url}")
     except Exception as e:
-        return f"Error encountered when taking action: {action_str}\nError: {e}"
+        error_msg = f"Error encountered when taking action: {action_str}\nError: {e}"
+        print(f"DEBUG: Web search error: {error_msg}")
+        return error_msg
     ret_value = wrap_return_value(web_obs)
+    print(f"DEBUG: Web search result length: {len(ret_value)}")
     return Result(
             value=ret_value,
             image=web_obs.screenshot, 
