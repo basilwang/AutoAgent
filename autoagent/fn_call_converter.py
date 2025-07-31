@@ -509,6 +509,8 @@ def _extract_and_validate_params(
 
         # Validate parameter is allowed
         if allowed_params and param_name not in allowed_params:
+            print(f"DEBUG: Parameter '{param_name}' is not allowed for function '{fn_name}'")
+            print(f"DEBUG: Allowed parameters: {allowed_params}")
             raise FunctionCallValidationError(
                 f"Parameter '{param_name}' is not allowed for function '{fn_name}'. "
                 f'Allowed parameters: {allowed_params}'
@@ -553,10 +555,18 @@ def _extract_and_validate_params(
     missing_params = required_params - found_params
     print(f"DEBUG: Found params: {found_params}")
     print(f"DEBUG: Missing params: {missing_params}")
+    print(f"DEBUG: Required params: {required_params}")
+    print(f"DEBUG: Function name: {fn_name}")
+    
     if missing_params:
+        print(f"DEBUG: Function call validation failed for '{fn_name}'")
+        print(f"DEBUG: Missing required parameters: {missing_params}")
+        print(f"DEBUG: Available parameters: {found_params}")
         raise FunctionCallValidationError(
             f"Missing required parameters for function '{fn_name}': {missing_params}"
         )
+    
+    print(f"DEBUG: Function call validation successful for '{fn_name}'")
     return params
 
 
