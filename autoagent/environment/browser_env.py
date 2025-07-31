@@ -30,6 +30,7 @@ from autoagent.io_utils import read_file
 from autoagent.environment.mdconvert import _get_page_markdown
 from autoagent.environment.browser_cookies import convert_cookies_to_python
 from autoagent.environment.cookies_data import COOKIES_LIST
+from autoagent.environment.china_web_config import optimize_for_chinese_sites
 # from constant import DOCKER_WORKPLACE_NAME, LOCAL_ROOT
 from functools import update_wrapper
 from inspect import signature
@@ -74,18 +75,21 @@ def _visit_page(url: str):
     try:
         # 尝试作为普通网页访问
         page.context.add_cookies(COOKIES_LIST)
-        # goto(url)
+        
+        # 根据网站类型优化配置
+        config = optimize_for_chinese_sites(url)
+        
         page.set_extra_http_headers({
-            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "User-Agent": config["user_agent"],
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
-            "Accept-Language": "en-US,en;q=0.9"
+            "Accept-Language": config["accept_language"]
         })
-        page.goto(url, timeout=6000)
+        page.goto(url, timeout=config["timeout"])
         if page.get_by_text("Verify you are human by completing the action below.").count() > 0:
             _checkMeetChallenge()
             # 等待页面完全加载
             # 增加等待时间，确保页面完全加载
-            page.wait_for_load_state("networkidle", timeout=3000)
+            page.wait_for_load_state("networkidle", timeout=config["wait_time"])
         # page.wait_for_timeout(3000)
         
     except Exception as e_outer:
@@ -189,9 +193,9 @@ def _click_id(bid: str, button: Literal["left", "middle", "right"] = "left"):
         page.context.add_cookies(COOKIES_LIST)
         # goto(url)
         page.set_extra_http_headers({
-            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
-            "Accept-Language": "en-US,en;q=0.9"
+            "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8"
         })
         
         # 执行点击并等待下载

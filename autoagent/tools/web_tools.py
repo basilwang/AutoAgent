@@ -324,7 +324,8 @@ def visit_url(context_variables, url: str):
             web_obs = to_web_obs(obs)
         elif " " in url:
             query = quote_plus(url)
-            action_str = f"_visit_page('https://www.google.com.sg/search?q={query}&hl=en&gl=US')"
+            # 使用必应搜索，支持中英文
+            action_str = f"_visit_page('https://www.bing.com/search?q={query}&FORM=QBLH&hl=en')"
             obs = env.step(action_str)
             web_obs = to_web_obs(obs)
         else:
@@ -342,14 +343,14 @@ def visit_url(context_variables, url: str):
 @register_tool("web_search")
 def web_search(context_variables, query: str):
     """
-    Performs a web search on 'https://www.bing.com/search' with the given query.
+    Performs a web search using Bing with the given query.
     Args:
         query: The query to search for.
     """
     env: BrowserEnv = context_variables.get("web_env", None)
     assert env is not None, "web_env is not set"
     try:
-        # action_str = f"_visit_page('https://www.google.com.sg/search?q={quote_plus(query)}&hl=en')"
+        # 统一使用必应搜索，支持中英文
         action_str = f"_visit_page('https://www.bing.com/search?q={quote_plus(query)}&FORM=QBLH&hl=en')"
 
         obs = env.step(action_str)
@@ -425,6 +426,56 @@ def get_page_markdown(context_variables):
 # """.strip()
     ret_value = wrap_return_value_markdown(web_obs)
     # ret_value = truncate_by_tokens(code_env, ret_value, max_tokens=10000)
+    return Result(
+            value=ret_value,
+            image=web_obs.screenshot, 
+        )
+
+@register_tool("visit_chinese_site")
+def visit_chinese_site(context_variables, url: str, use_proxy: bool = False):
+    """
+    Navigate to Chinese domestic websites with optimized settings for better compatibility.
+    Args:
+        url: The URL to navigate to.
+        use_proxy: Whether to use proxy for accessing the site (if configured).
+    """
+    env: BrowserEnv = context_variables.get("web_env", None)
+    assert env is not None, "web_env is not set"
+    try:
+        # 确保URL格式正确
+        if not url.startswith(("https://", "http://")):
+            url = "https://" + url
+            
+        action_str = f"_visit_page('{url}')"
+        obs = env.step(action_str)
+        web_obs = to_web_obs(obs)
+        
+    except Exception as e:
+        return f"Error encountered when taking action: {action_str}\nError: {e}"
+    
+    ret_value = wrap_return_value(web_obs, f"Successfully visited Chinese site: {url}")
+    return Result(
+            value=ret_value,
+            image=web_obs.screenshot, 
+        )
+
+@register_tool("chinese_web_search")
+def chinese_web_search(context_variables, query: str):
+    """
+    Performs a web search using Bing with the given query (supports both Chinese and English).
+    Args:
+        query: The query to search for.
+    """
+    env: BrowserEnv = context_variables.get("web_env", None)
+    assert env is not None, "web_env is not set"
+    try:
+        # 使用必应搜索，支持中英文
+        action_str = f"_visit_page('https://www.bing.com/search?q={quote_plus(query)}&FORM=QBLH&hl=en')"
+        obs = env.step(action_str)
+        web_obs = to_web_obs(obs)
+    except Exception as e:
+        return f"Error encountered when taking action: {action_str}\nError: {e}"
+    ret_value = wrap_return_value(web_obs)
     return Result(
             value=ret_value,
             image=web_obs.screenshot, 
