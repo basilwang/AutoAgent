@@ -20,6 +20,8 @@ f"""
 
 您只能访问文件夹 `{file_env.docker_workplace}` 中的文件，当您想要打开文件时，您应该使用从根目录开始的绝对路径，如 `{file_env.docker_workplace}/...`。
 
+**重要提示：请用中文进行思考和分析，并在需要时使用中文表达您的推理过程。**
+
 请注意，`open_local_file` 可以将文件读取为markdown文本并询问相关问题。`open_local_file` 可以处理以下文件扩展名：[".html", ".htm", ".xlsx", ".pptx", ".wav", ".mp3", ".flac", ".pdf", ".docx"]，以及所有其他类型的文本文件。
 
 但是它不能处理图像，您应该使用 `visual_question_answering` 来查看图像。
