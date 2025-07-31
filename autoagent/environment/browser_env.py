@@ -30,7 +30,7 @@ from autoagent.io_utils import read_file
 from autoagent.environment.mdconvert import _get_page_markdown
 from autoagent.environment.browser_cookies import convert_cookies_to_python
 from autoagent.environment.cookies_data import COOKIES_LIST
-from autoagent.environment.china_web_config import optimize_for_chinese_sites
+# from autoagent.environment.china_web_config import optimize_for_chinese_sites
 # from constant import DOCKER_WORKPLACE_NAME, LOCAL_ROOT
 from functools import update_wrapper
 from inspect import signature
@@ -77,8 +77,13 @@ def _visit_page(url: str):
         # 尝试作为普通网页访问
         page.context.add_cookies(COOKIES_LIST)
         
-        # 根据网站类型优化配置
-        config = optimize_for_chinese_sites(url)
+        # 使用默认配置，避免依赖问题
+        config = {
+            "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "accept_language": "zh-CN,zh;q=0.9,en;q=0.8",
+            "timeout": 10000,
+            "wait_time": 5000
+        }
         print(f"DEBUG: Browser config: {config}")
         
         page.set_extra_http_headers({
