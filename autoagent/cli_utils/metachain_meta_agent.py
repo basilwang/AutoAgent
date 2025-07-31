@@ -14,12 +14,25 @@ from autoagent.agents.meta_agent.form_complie import parse_agent_form
 
 
 def extract_agents_content(text):
+    print("DEBUG: 开始提取<agents>标签内容")
+    print(f"输入文本长度: {len(text)} 字符")
+    print(f"输入文本前200字符: {text[:200]}")
+    
     pattern = r'(<agents>.*?</agents>)'
     # re.DOTALL 让 . 也能匹配换行符
     match = re.search(pattern, text, re.DOTALL)
+    
     if match:
-        return match.group(1)
-    return None
+        extracted_content = match.group(1)
+        print("DEBUG: 成功找到<agents>标签")
+        print(f"提取内容长度: {len(extracted_content)} 字符")
+        print(f"提取内容前200字符: {extracted_content[:200]}")
+        return extracted_content
+    else:
+        print("DEBUG: 未找到<agents>标签")
+        print("DEBUG: 尝试查找的文本内容:")
+        print(text[:1000] if len(text) > 1000 else text)
+        return None
 
 def agent_profiling(agent_former, client, messages, context_variables, requirements, debug): 
     messages.append({"role": "user", "content": requirements+ """
@@ -31,19 +44,47 @@ Directly output the form in the XML format without ANY other text.
     messages.extend(response.messages)
     agent_form = None
 
+    # 添加调试信息：打印原始输出
+    print("=" * 80)
+    print("DEBUG: Agent Former Agent 原始输出:")
+    print("=" * 80)
+    print(output_xml_form)
+    print("=" * 80)
+    print(f"输出长度: {len(output_xml_form)} 字符")
+    print(f"是否包含 <agents> 标签: {'<agents>' in output_xml_form}")
+    print(f"是否包含 </agents> 标签: {'</agents>' in output_xml_form}")
+    print("=" * 80)
+
     MAX_RETRY = 3
     for i in range(MAX_RETRY):
         try:
             output_xml_form = extract_agents_content(output_xml_form)
+            if output_xml_form is None:
+                print(f"DEBUG: 第 {i+1} 次尝试 - 未找到 <agents> 标签")
+                print("DEBUG: 尝试查找的文本内容:")
+                print(output_xml_form[:1000] if len(output_xml_form) > 1000 else output_xml_form)
+            else:
+                print(f"DEBUG: 第 {i+1} 次尝试 - 成功提取到 <agents> 标签")
+                print("DEBUG: 提取的XML内容:")
+                print(output_xml_form)
+            
             assert output_xml_form is not None, "No the XML form should be found in the output with the tag <agents>...</agents>."
             agent_form = parse_agent_form(output_xml_form)
+            print(f"DEBUG: 第 {i+1} 次尝试 - XML解析成功")
             break
         except Exception as e:
             print(f"Error parsing XML to agent form: {e}. Retry {i+1}/{MAX_RETRY}")
+            print(f"DEBUG: 第 {i+1} 次尝试 - XML解析失败，错误详情: {e}")
             messages.append({"role": "user", "content": f"Error parsing XML to agent form: {e}\nNote that there are some special restrictions for creating agent form, please try again."})
             response = client.run(agent_former, messages, context_variables, debug=debug)
             output_xml_form = response.messages[-1]["content"]
             messages.extend(response.messages)
+            
+            # 再次打印调试信息
+            print(f"DEBUG: 第 {i+1} 次重试 - Agent Former Agent 新输出:")
+            print("=" * 60)
+            print(output_xml_form)
+            print("=" * 60)
     return agent_form, output_xml_form, messages
 
 def tool_editing(tool_editor_agent, client, messages, context_variables, agent_form, output_xml_form, debug, suggestions = ""):

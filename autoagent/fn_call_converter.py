@@ -503,12 +503,9 @@ def _extract_and_validate_params(
 
     # Collect parameters
     found_params = set()
-    print(f"DEBUG: Required params: {required_params}")
-    print(f"DEBUG: Allowed params: {allowed_params}")
     for param_match in param_matches:
         param_name = param_match.group(1)
         param_value = param_match.group(2).strip()
-        print(f"DEBUG: Found param - name: '{param_name}', value: '{param_value}'")
 
         # Validate parameter is allowed
         if allowed_params and param_name not in allowed_params:
@@ -724,14 +721,6 @@ def convert_non_fncall_messages_to_fncall_messages(
                     )
 
                 # Parse parameters
-                param_matches = re.finditer(FN_PARAM_REGEX_PATTERN, fn_body, re.DOTALL)
-                
-                # Debug: Print function body and parameter matches
-                print(f"DEBUG: Function name: {fn_name}")
-                print(f"DEBUG: Function body: {fn_body}")
-                print(f"DEBUG: Parameter matches: {list(param_matches)}")
-                
-                # Re-find matches since we consumed the iterator above
                 param_matches = re.finditer(FN_PARAM_REGEX_PATTERN, fn_body, re.DOTALL)
                 params = _extract_and_validate_params(
                     matching_tool, param_matches, fn_name
