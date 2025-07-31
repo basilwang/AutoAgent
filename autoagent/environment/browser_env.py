@@ -64,6 +64,7 @@ def _visit_page(url: str):
     Examples:
         _visit_page('https://archive.org/download/higpt_stage2/instruct_ds_dblp.tar.gz')
     """
+    print(f"DEBUG: _visit_page called with URL: {url}")
     # def _local_to_docker(local_path: str):
     #     """
     #     Convert a local path to a docker path
@@ -78,14 +79,18 @@ def _visit_page(url: str):
         
         # 根据网站类型优化配置
         config = optimize_for_chinese_sites(url)
+        print(f"DEBUG: Browser config: {config}")
         
         page.set_extra_http_headers({
             "User-Agent": config["user_agent"],
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
             "Accept-Language": config["accept_language"]
         })
+        print(f"DEBUG: Attempting to goto URL: {url}")
         page.goto(url, timeout=config["timeout"])
+        print(f"DEBUG: Successfully navigated to: {page.url}")
         if page.get_by_text("Verify you are human by completing the action below.").count() > 0:
+            print("DEBUG: Detected CAPTCHA challenge")
             _checkMeetChallenge()
             # 等待页面完全加载
             # 增加等待时间，确保页面完全加载
@@ -93,6 +98,9 @@ def _visit_page(url: str):
         # page.wait_for_timeout(3000)
         
     except Exception as e_outer:
+        print(f"DEBUG: Exception in _visit_page: {e_outer}")
+        print(f"DEBUG: Exception type: {type(e_outer)}")
+        print(f"DEBUG: Exception message: {str(e_outer)}")
         # 处理文件下载情况
         if "net::ERR_ABORTED" in str(e_outer):
             import os
