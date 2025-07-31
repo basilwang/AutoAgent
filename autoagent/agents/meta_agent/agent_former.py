@@ -73,154 +73,20 @@ IMPORTANT RULES:
   * system_input should describe the complete input space
   * Each agent_input should specify which subset of the system_input it handles
   * system_output should represent the unified response format
-""" + \
-f"""
-Existing tools you can use is: 
-{list_tools(context_variables)}
 
-Existing agents you can use is: 
-{list_agents(context_variables)}
-""" + \
-r"""
-EXAMPLE 1 - SINGLE AGENT:
-
-User: I want to build an agent that can answer the user's question about the OpenAI products. The document of the OpenAI products is available at `/workspace/docs/openai_products/`.
-The agent should be able to: 
-1. query and answer the user's question about the OpenAI products based on the document.
-2. send email to the user if the sending email is required in the user's request.
-
-The form should be:
-<agents>
-    <system_input>
-        Questions from the user about the OpenAI products. The document of the OpenAI products is available at `/workspace/docs/openai_products/`.
-    </system_input>
-    <system_output>
-        <key>answer</key>
-        <description>The answer to the user's question.</description>
-    </system_output>
-    <agent>
-        <name>Helper Center Agent</name>
-        <description>The helper center agent is an agent that serves as a helper center agent for a specific user to answer the user's question about the OpenAI products.</description>
-        <instructions>You are a helper center agent that can be used to help the user with their request.</instructions>
-        <tools category="existing">
-            <tool>
-                <name>save_raw_docs_to_vector_db</name>
-                <description>Save the raw documents to the vector database. The documents could be: 
-                - ANY text document with the extension of pdf, docx, txt, etcs.
-                - A zip file containing multiple text documents
-                - a directory containing multiple text documents
-                All documents will be converted to raw text format and saved to the vector database in the chunks of 4096 tokens.</description>
-            </tool>
-            <tool>
-                <name>query_db</name>
-                <description>Query the vector database to find the answer to the user's question.</description> 
-            </tool>
-            <tool>
-                <name>modify_query</name>
-                <description>Modify the user's question to a more specific question.</description>
-            </tool>
-            <tool>
-                <name>answer_query</name>
-                <description>Answer the user's question based on the answer from the vector database.</description>
-            </tool>
-            <tool>
-                <name>can_answer</name>
-                <description>Check if the user's question can be answered by the vector database.</description>
-            </tool>
-        </tools>
-        <tools category="new">
-            <tool>
-                <name>send_email</name>
-                <description>Send an email to the user.</description>
-            </tool>
-        </tools>
-        <agent_input>
-            <key>user_question</key>
-            <description>The question from the user about the OpenAI products.</description>
-        </agent_input>
-        <agent_output>
-            <key>answer</key>
-            <description>The answer to the user's question.</description>
-        </agent_output>
-    </agent>
-</agents>
-
-EXAMPLE 2 - MULTI-AGENT:
-
-User: I want to build a multi-agent system that can handle two types of requests for the specific user:
-1. Purchase a product or service
-2. Refund a product or service
-The specific user worked for is named John Doe.
-
-The form should be:
-<agents>
-    <system_input>
-        The user request from the specific user about the product or service, mainly categorized into 2 types:
-        - Purchase a product or service
-        - Refund a product or service
-    </system_input>
-    <system_output>
-        <key>response</key>
-        <description>The response of the agent to the user's request.</description>
-    </system_output>
-    <global_variables>
-        <variable>
-            <key>user_name</key>
-            <description>The name of the user.</description>
-            <value>John Doe</value>
-        </variable>
-    </global_variables>
-    <agent>
-        <name>Personal Sales Agent</name>
-        <description>The personal sales agent is an agent that serves as a personal sales agent for a specific user.</description>
-        <instructions>You are a personal sales agent that can be used to help the user {user_name} with their request.</instructions>
-        <tools category="new">
-            <tool>
-                <name>recommend_product</name>
-                <description>Recommend a product to the user.</description>
-            </tool>
-            <tool>
-                <name>recommend_service</name>
-                <description>Recommend a service to the user.</description>
-            </tool>
-            <tool>
-                <name>conduct_sales</name>
-                <description>Conduct sales with the user.</description>
-            </tool>
-        </tools>
-        <agent_input>
-            <key>user_request</key>
-            <description>Request from the specific user for purchasing a product or service.</description>
-        </agent_input>
-        <agent_output>
-            <key>response</key>
-            <description>The response of the agent to the user's request.</description>
-        </agent_output>
-    </agent>
-    <agent>
-        <name>Personal Refunds Agent</name>
-        <description>The personal refunds agent is an agent that serves as a personal refunds agent for a specific user.</description>
-        <instructions>Help the user {user_name} with a refund. If the reason is that it was too expensive, offer the user a discount. If they insist, then process the refund.</instructions>
-        <tools category="new">
-            <tool>
-                <name>process_refund</name>
-                <description>Refund an item. Refund an item. Make sure you have the item_id of the form item_... Ask for user confirmation before processing the refund.</description>
-            </tool>
-            <tool>
-                <name>apply_discount</name>
-                <description>Apply a discount to the user's cart.</description>
-            </tool>
-        </tools>
-        <agent_input>
-            <key>user_request</key>
-            <description>Request from the specific user for refunding a product or service.</description>
-        </agent_input>
-        <agent_output>
-            <key>response</key>
-            <description>The response of the agent to the user's request.</description>
-        </agent_output>
-    </agent>
-</agents>
+AVAILABLE TOOLS FOR REFERENCE:
+Common tools that can be used in agent definitions include:
+- web_search: Search web content using specified keywords and filters
+- text_classifier: Classify text content into predefined categories
+- scheduler: Execute tasks at specified time intervals
+- visit_url: Visit a specific URL
+- click: Click on elements on a webpage
+- input_text: Input text into form fields
+- get_page_markdown: Get the markdown content of the current page
+- execute_command: Execute system commands
+- create_file: Create a new file
+- read_file: Read file content
+- list_files: List files in a directory
 
 GUIDELINES:
 1. Each agent must have clear, focused responsibilities
