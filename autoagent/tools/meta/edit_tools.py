@@ -37,6 +37,7 @@ def protect_tools(tool_name: str):
         raise Exception(f"The tool `{tool_name}` can NOT be modified. You can DIRECTLY use the `{tool_name}` tool by USING the `run_tool` tool. Or you can create a new tool using this tool by `from autoagent.tools import {tool_name}`.")
 
 
+
 @register_tool("list_tools")
 def list_tools(context_variables): 
     """
@@ -44,17 +45,31 @@ def list_tools(context_variables):
     Returns:
         A list of information of all plugin tools including name, args, docstring, body, return_type, file_path.
     """
+    env: Union[LocalEnv, DockerEnv] = context_variables.get("code_env", LocalEnv())
     try:
-        # 直接在当前环境中导入registry并获取工具信息
-        from autoagent.registry import registry
-        import json
-        tools_info = registry.display_plugin_tools_info
-        return json.dumps(tools_info, indent=4)
+        path = get_metachain_path(env)
     except Exception as e:
-        return f"Failed to list tools. Error: {str(e)}"
-def check_tool_name(tool_name: str):
-    if tool_name == "visual_question_answering":
-        raise Exception("The tool `visual_question_answering` is not allowed to be modified. Directly use the `visual_question_answering` tool to handlen ANY visual tasks.")
+        return "Failed to list tools. Error: " + str(e)
+    python_code = '"from autoagent.registry import registry; import json; print(\\"TOOL_LIST_START\\"); print(json.dumps(registry.display_plugin_tools_info, indent=4)); print(\\"TOOL_LIST_END\\")"'
+    list_tools_cmd = f"cd {path} && DEFAULT_LOG=False python -c {python_code}"
+    result = env.run_command(list_tools_cmd)
+    if result['status'] != 0:
+        return "Failed to list tools. Error: " + result['result']
+    try:
+        output = result['result']
+        start_marker = "TOOL_LIST_START"
+        end_marker = "TOOL_LIST_END"
+        start_idx = output.find(start_marker) + len(start_marker)
+        end_idx = output.find(end_marker)
+        
+        if start_idx == -1 or end_idx == -1:
+            return "Failed to parse tool list: markers not found"
+            
+        json_str = output[start_idx:end_idx].strip()
+        return json_str
+    except Exception as e:
+        return f"Failed to process output: {str(e)}"
+    # return result['result']
 @register_tool("create_tool")
 def create_tool(tool_name: str, tool_code: str, context_variables): 
     """
