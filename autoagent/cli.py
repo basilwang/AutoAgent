@@ -400,21 +400,28 @@ def deep_research(container_name: str, port: int, local_env: bool):
             agent_name = agent.name
             console.print(f"[bold green][bold magenta]@{agent_name}[/bold magenta] will help you, be patient...[/bold green]")
             messages.append({"role": "user", "content": query})
-            response = client.run(agent, messages, context_variables, debug=False)
-            messages.extend(response.messages)
-            model_answer_raw = response.messages[-1]['content']
+            try:
+                response = client.run(agent, messages, context_variables, debug=False)
+                messages.extend(response.messages)
+                model_answer_raw = response.messages[-1]['content']
 
-            # attempt to parse model_answer
-            if model_answer_raw.startswith('Case resolved'):
-                model_answer = re.findall(r'<solution>(.*?)</solution>', model_answer_raw, re.DOTALL)
-                if len(model_answer) == 0:
+                # attempt to parse model_answer
+                if model_answer_raw.startswith('Case resolved'):
+                    model_answer = re.findall(r'<solution>(.*?)</solution>', model_answer_raw, re.DOTALL)
+                    if len(model_answer) == 0:
+                        model_answer = model_answer_raw
+                    else:
+                        model_answer = model_answer[0]
+                else: 
                     model_answer = model_answer_raw
-                else:
-                    model_answer = model_answer[0]
-            else: 
-                model_answer = model_answer_raw
-            console.print(f"[bold green][bold magenta]@{agent_name}[/bold magenta] has finished with the response:\n[/bold green] [bold blue]{model_answer}[/bold blue]")
-            agent = response.agent
+                console.print(f"[bold green][bold magenta]@{agent_name}[/bold magenta] has finished with the response:\n[/bold green] [bold blue]{model_answer}[/bold blue]")
+                agent = response.agent
+            except Exception as e:
+                error_msg = f"执行过程中发生错误: {str(e)}"
+                console.print(f"[bold red]错误: {error_msg}[/bold red]")
+                logger.info(f'CLI执行错误: {e}', title='ERROR', color='red')
+                # 不要终止程序，继续等待用户输入
+                continue
         elif agent == "select": 
             code_env: DockerEnv = context_variables["code_env"]
             local_workplace = code_env.local_workplace

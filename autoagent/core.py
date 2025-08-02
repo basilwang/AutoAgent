@@ -121,93 +121,98 @@ class MetaChain:
         stream: bool,
         debug: bool,
     ) -> Message:
-        context_variables = defaultdict(str, context_variables)
-        instructions = (
-            agent.instructions(context_variables)
-            if callable(agent.instructions)
-            else agent.instructions
-        )
-        if agent.examples:
-            examples = agent.examples(context_variables) if callable(agent.examples) else agent.examples
-            history = examples + history
-        
-        messages = [{"role": "system", "content": instructions}] + history
-        # debug_print(debug, "Getting chat completion for...:", messages)
-        
-        tools = [function_to_json(f) for f in agent.functions]
-        # hide context_variables from model
-        for tool in tools:
-            params = tool["function"]["parameters"]
-            params["properties"].pop(__CTX_VARS_NAME__, None)
-            if __CTX_VARS_NAME__ in params["required"]:
-                params["required"].remove(__CTX_VARS_NAME__)
-        create_model = model_override or agent.model
+        try:
+            context_variables = defaultdict(str, context_variables)
+            instructions = (
+                agent.instructions(context_variables)
+                if callable(agent.instructions)
+                else agent.instructions
+            )
+            if agent.examples:
+                examples = agent.examples(context_variables) if callable(agent.examples) else agent.examples
+                history = examples + history
+            
+            messages = [{"role": "system", "content": instructions}] + history
+            # debug_print(debug, "Getting chat completion for...:", messages)
+            
+            tools = [function_to_json(f) for f in agent.functions]
+            # hide context_variables from model
+            for tool in tools:
+                params = tool["function"]["parameters"]
+                params["properties"].pop(__CTX_VARS_NAME__, None)
+                if __CTX_VARS_NAME__ in params["required"]:
+                    params["required"].remove(__CTX_VARS_NAME__)
+            create_model = model_override or agent.model
 
-        if "gemini" in create_model.lower():
-            tools = adapt_tools_for_gemini(tools)
-        if FN_CALL:
-            # create_model = model_override or agent.model
-            assert litellm.supports_function_calling(model = create_model) == True, f"Model {create_model} does not support function calling, please set `FN_CALL=False` to use non-function calling mode"
-            create_params = {
-                "model": create_model,
-                "messages": messages,
-                "tools": tools or None,
-                "tool_choice": agent.tool_choice,
-                "stream": stream,
-            }
-            NO_SENDER_MODE = False
-            for not_sender_model in NOT_SUPPORT_SENDER:
-                if not_sender_model in create_model:
-                    NO_SENDER_MODE = True
-                    break
+            if "gemini" in create_model.lower():
+                tools = adapt_tools_for_gemini(tools)
+            if FN_CALL:
+                # create_model = model_override or agent.model
+                assert litellm.supports_function_calling(model = create_model) == True, f"Model {create_model} does not support function calling, please set `FN_CALL=False` to use non-function calling mode"
+                create_params = {
+                    "model": create_model,
+                    "messages": messages,
+                    "tools": tools or None,
+                    "tool_choice": agent.tool_choice,
+                    "stream": stream,
+                }
+                NO_SENDER_MODE = False
+                for not_sender_model in NOT_SUPPORT_SENDER:
+                    if not_sender_model in create_model:
+                        NO_SENDER_MODE = True
+                        break
 
-            if NO_SENDER_MODE:
-                messages = create_params["messages"]
-                for message in messages:
-                    if 'sender' in message:
-                        del message['sender']
-                create_params["messages"] = messages
+                if NO_SENDER_MODE:
+                    messages = create_params["messages"]
+                    for message in messages:
+                        if 'sender' in message:
+                            del message['sender']
+                    create_params["messages"] = messages
 
-            if tools and create_params['model'].startswith("gpt"):
-                create_params["parallel_tool_calls"] = agent.parallel_tool_calls
-            completion_response = completion(**create_params)
-        else: 
-            # create_model = model_override or agent.model
-            assert agent.tool_choice == "required", f"Non-function calling mode MUST use tool_choice = 'required' rather than {agent.tool_choice}"
-            last_content = messages[-1]["content"]
-            tools_description = convert_tools_to_description(tools)
-            messages[-1]["content"] = last_content + "\n[IMPORTANT] You MUST use the tools provided to complete the task.\n" + SYSTEM_PROMPT_SUFFIX_TEMPLATE.format(description=tools_description)
-            NO_SENDER_MODE = False
-            for not_sender_model in NOT_SUPPORT_SENDER:
-                if not_sender_model in create_model:
-                    NO_SENDER_MODE = True
-                    break
-
-            if NO_SENDER_MODE:
-                for message in messages:
-                    if 'sender' in message:
-                        del message['sender']
-            if NON_FN_CALL:
-                messages = convert_fn_messages_to_non_fn_messages(messages)
-            if ADD_USER and messages[-1]["role"] != "user":
-                # messages.append({"role": "user", "content": "Please think twice and take the next action according to your previous actions and observations."})
-                messages = interleave_user_into_messages(messages)
-            create_params = {
-                "model": create_model,
-                "messages": messages,
-                "stream": stream,
-                "base_url": API_BASE_URL,
-            }
-            completion_response = completion(**create_params)
-            last_message = [{"role": "assistant", "content": completion_response.choices[0].message.content}]
-            converted_message = convert_non_fncall_messages_to_fncall_messages(last_message, tools)
-            if "tool_calls" in converted_message[0]:
-                converted_tool_calls = [ChatCompletionMessageToolCall(**tool_call) for tool_call in converted_message[0]["tool_calls"]]
+                if tools and create_params['model'].startswith("gpt"):
+                    create_params["parallel_tool_calls"] = agent.parallel_tool_calls
+                completion_response = completion(**create_params)
             else: 
-                converted_tool_calls = None
-            completion_response.choices[0].message = litellmMessage(content = converted_message[0]["content"], role = "assistant", tool_calls = converted_tool_calls)
+                # create_model = model_override or agent.model
+                assert agent.tool_choice == "required", f"Non-function calling mode MUST use tool_choice = 'required' rather than {agent.tool_choice}"
+                last_content = messages[-1]["content"]
+                tools_description = convert_tools_to_description(tools)
+                messages[-1]["content"] = last_content + "\n[IMPORTANT] You MUST use the tools provided to complete the task.\n" + SYSTEM_PROMPT_SUFFIX_TEMPLATE.format(description=tools_description)
+                NO_SENDER_MODE = False
+                for not_sender_model in NOT_SUPPORT_SENDER:
+                    if not_sender_model in create_model:
+                        NO_SENDER_MODE = True
+                        break
 
-        return completion_response
+                if NO_SENDER_MODE:
+                    for message in messages:
+                        if 'sender' in message:
+                            del message['sender']
+                if NON_FN_CALL:
+                    messages = convert_fn_messages_to_non_fn_messages(messages)
+                if ADD_USER and messages[-1]["role"] != "user":
+                    # messages.append({"role": "user", "content": "Please think twice and take the next action according to your previous actions and observations."})
+                    messages = interleave_user_into_messages(messages)
+                create_params = {
+                    "model": create_model,
+                    "messages": messages,
+                    "stream": stream,
+                    "base_url": API_BASE_URL,
+                }
+                completion_response = completion(**create_params)
+                last_message = [{"role": "assistant", "content": completion_response.choices[0].message.content}]
+                converted_message = convert_non_fncall_messages_to_fncall_messages(last_message, tools)
+                if "tool_calls" in converted_message[0]:
+                    converted_tool_calls = [ChatCompletionMessageToolCall(**tool_call) for tool_call in converted_message[0]["tool_calls"]]
+                else: 
+                    converted_tool_calls = None
+                completion_response.choices[0].message = litellmMessage(content = converted_message[0]["content"], role = "assistant", tool_calls = converted_tool_calls)
+
+            return completion_response
+        except Exception as e:
+            error_msg = f"获取聊天完成时发生错误: {str(e)}"
+            self.logger.info(error_msg, title="Chat Completion Error", color="red")
+            raise Exception(error_msg) from e
 
     def handle_function_result(self, result, debug) -> Result:
         match result:
@@ -253,7 +258,20 @@ class MetaChain:
                     }
                 )
                 continue
-            args = json.loads(tool_call.function.arguments)
+            try:
+                args = json.loads(tool_call.function.arguments)
+            except json.JSONDecodeError as e:
+                error_msg = f"解析工具参数时发生JSON错误: {str(e)}"
+                self.logger.info(error_msg, title="Tool Call JSON Error", color="red")
+                partial_response.messages.append(
+                    {
+                        "role": "tool",
+                        "tool_call_id": tool_call.id,
+                        "name": name,
+                        "content": f"Error: Invalid JSON in tool arguments. {error_msg}",
+                    }
+                )
+                continue
             
             # debug_print(
             #     debug, f"Processing tool call: {name} with arguments {args}")
@@ -263,9 +281,35 @@ class MetaChain:
             #     args[__CTX_VARS_NAME__] = context_variables
             if __CTX_VARS_NAME__ in inspect.signature(func).parameters.keys():
                 args[__CTX_VARS_NAME__] = context_variables
-            raw_result = function_map[name](**args)
+            try:
+                raw_result = function_map[name](**args)
+            except Exception as e:
+                error_msg = f"执行工具 {name} 时发生错误: {str(e)}"
+                self.logger.info(error_msg, title="Tool Execution Error", color="red")
+                partial_response.messages.append(
+                    {
+                        "role": "tool",
+                        "tool_call_id": tool_call.id,
+                        "name": name,
+                        "content": f"Error: {error_msg}",
+                    }
+                )
+                continue
 
-            result: Result = self.handle_function_result(raw_result, debug)
+            try:
+                result: Result = self.handle_function_result(raw_result, debug)
+            except Exception as e:
+                error_msg = f"处理工具 {name} 结果时发生错误: {str(e)}"
+                self.logger.info(error_msg, title="Tool Result Handling Error", color="red")
+                partial_response.messages.append(
+                    {
+                        "role": "tool",
+                        "tool_call_id": tool_call.id,
+                        "name": name,
+                        "content": f"Error: {error_msg}",
+                    }
+                )
+                continue
     
             partial_response.messages.append(
                 {
@@ -424,22 +468,33 @@ class MetaChain:
 
         while len(history) - init_len < max_turns and active_agent:
 
-            # get completion with current history, agent
-            completion = self.get_chat_completion(
-                agent=active_agent,
-                history=history,
-                context_variables=context_variables,
-                model_override=model_override,
-                stream=stream,
-                debug=debug,
-            )
-            message: Message = completion.choices[0].message
-            message.sender = active_agent.name
-            # debug_print(debug, "Received completion:", message.model_dump_json(indent=4), log_path=log_path, title="Received Completion", color="blue")
-            self.logger.pretty_print_messages(message)
-            history.append(
-                json.loads(message.model_dump_json())
-            )  # to avoid OpenAI types (?)
+            try:
+                # get completion with current history, agent
+                completion = self.get_chat_completion(
+                    agent=active_agent,
+                    history=history,
+                    context_variables=context_variables,
+                    model_override=model_override,
+                    stream=stream,
+                    debug=debug,
+                )
+                message: Message = completion.choices[0].message
+                message.sender = active_agent.name
+                # debug_print(debug, "Received completion:", message.model_dump_json(indent=4), log_path=log_path, title="Received Completion", color="blue")
+                self.logger.pretty_print_messages(message)
+                history.append(
+                    json.loads(message.model_dump_json())
+                )  # to avoid OpenAI types (?)
+            except Exception as e:
+                error_msg = f"获取聊天完成时发生错误: {str(e)}"
+                self.logger.info(error_msg, title="Run Loop Error", color="red")
+                # 添加错误消息到历史记录
+                history.append({
+                    "role": "assistant",
+                    "content": f"执行过程中发生错误: {error_msg}",
+                    "sender": active_agent.name
+                })
+                break
 
             # if not message.tool_calls or not execute_tools:
             #     self.logger.info("Ending turn.", title="End Turn", color="red")
