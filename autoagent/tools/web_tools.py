@@ -324,8 +324,8 @@ def visit_url(context_variables, url: str):
             web_obs = to_web_obs(obs)
         elif " " in url:
             query = quote_plus(url)
-            # 使用必应搜索，支持中英文
-            action_str = f"_visit_page('https://www.bing.com/search?q={query}&FORM=QBLH&hl=en')"
+            # 使用百度搜索，支持中英文
+            action_str = f"_visit_page('https://www.baidu.com/s?wd={query}')"
             obs = env.step(action_str)
             web_obs = to_web_obs(obs)
         else:
@@ -343,7 +343,7 @@ def visit_url(context_variables, url: str):
 @register_tool("web_search")
 def web_search(context_variables, query: str):
     """
-    Performs a web search using Bing with the given query.
+    Performs a web search using Baidu with the given query.
     Args:
         query: The query to search for.
     """
@@ -351,8 +351,8 @@ def web_search(context_variables, query: str):
     env: BrowserEnv = context_variables.get("web_env", None)
     assert env is not None, "web_env is not set"
     try:
-        # 统一使用必应搜索，支持中英文
-        action_str = f"_visit_page('https://www.bing.com/search?q={quote_plus(query)}&FORM=QBLH&hl=en')"
+        # 使用百度搜索，支持中英文
+        action_str = f"_visit_page('https://www.baidu.com/s?wd={quote_plus(query)}')"
         print(f"DEBUG: Executing action: {action_str}")
 
         obs = env.step(action_str)
@@ -468,15 +468,15 @@ def visit_chinese_site(context_variables, url: str, use_proxy: bool = False):
 @register_tool("chinese_web_search")
 def chinese_web_search(context_variables, query: str):
     """
-    Performs a web search using Bing with the given query (supports both Chinese and English).
+    Performs a web search using Baidu with the given query (supports both Chinese and English).
     Args:
         query: The query to search for.
     """
     env: BrowserEnv = context_variables.get("web_env", None)
     assert env is not None, "web_env is not set"
     try:
-        # 使用必应搜索，支持中英文
-        action_str = f"_visit_page('https://www.bing.com/search?q={quote_plus(query)}&FORM=QBLH&hl=en')"
+        # 使用百度搜索，支持中英文
+        action_str = f"_visit_page('https://www.baidu.com/s?wd={quote_plus(query)}')"
         obs = env.step(action_str)
         web_obs = to_web_obs(obs)
     except Exception as e:
