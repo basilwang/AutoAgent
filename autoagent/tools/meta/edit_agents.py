@@ -95,8 +95,8 @@ def run_agent(agent_name: str, query: str, ctx_vars: dict, context_variables, mo
     Returns:
         A string representation of the result of the agent run.
     """
-    if model not in ["claude-3-5-sonnet-20241022"]:
-        return "[ERROR] The model " + model + " is not supported. Supported models: claude-3-5-sonnet-20241022."
+    # if model not in ["claude-3-5-sonnet-20241022"]:
+    #     return "[ERROR] The model " + model + " is not supported. Supported models: claude-3-5-sonnet-20241022."
     env: Union[LocalEnv, DockerEnv] = context_variables.get("code_env", LocalEnv())
     try:
         path = get_metachain_path(env)
