@@ -237,6 +237,8 @@ PLEASE follow the format strictly! PLEASE EMIT ONE AND ONLY ONE FUNCTION CALL PE
 # Regex patterns for function call parsing
 FN_REGEX_PATTERN = r'<function=([^>]+)>\n(.*?)</function>'
 FN_PARAM_REGEX_PATTERN = r'<parameter=([^>]+)>(.*?)</parameter>'
+# Also match parameters without names: <parameter>value</parameter>
+FN_PARAM_NO_NAME_REGEX_PATTERN = r'<parameter>(.*?)</parameter>'
 
 # Add new regex pattern for tool execution results
 TOOL_RESULT_REGEX_PATTERN = r'EXECUTION RESULT of \[(.*?)\]:\n(.*)'
@@ -507,6 +509,21 @@ def _extract_and_validate_params(
         param_name = param_match.group(1)
         param_value = param_match.group(2).strip()
 
+        # Handle case where parameter name is missing (LLM generated <parameter>value</parameter>)
+        if not param_name and len(required_params) == 1:
+            # If there's only one required parameter, use it
+            param_name = list(required_params)[0]
+            print(f"DEBUG: Parameter name missing, using single required parameter: {param_name}")
+        elif not param_name:
+            # If there are multiple parameters or no required parameters, we can't determine which one
+            print(f"DEBUG: Parameter name missing and cannot determine which parameter to use")
+            print(f"DEBUG: Required parameters: {required_params}")
+            print(f"DEBUG: Allowed parameters: {allowed_params}")
+            raise FunctionCallValidationError(
+                f"Parameter name is missing in function call for '{fn_name}'. "
+                f'Required parameters: {required_params}, Allowed parameters: {allowed_params}'
+            )
+
         # Validate parameter is allowed
         if allowed_params and param_name not in allowed_params:
             print(f"DEBUG: Parameter '{param_name}' is not allowed for function '{fn_name}'")
@@ -730,8 +747,24 @@ def convert_non_fncall_messages_to_fncall_messages(
                         f"Function '{fn_name}' not found in available tools: {[tool['function']['name'] for tool in tools if tool['type'] == 'function']}"
                     )
 
-                # Parse parameters
-                param_matches = re.finditer(FN_PARAM_REGEX_PATTERN, fn_body, re.DOTALL)
+                # Parse parameters - handle both named and unnamed parameters
+                param_matches = list(re.finditer(FN_PARAM_REGEX_PATTERN, fn_body, re.DOTALL))
+                # Also find parameters without names
+                param_no_name_matches = list(re.finditer(FN_PARAM_NO_NAME_REGEX_PATTERN, fn_body, re.DOTALL))
+                
+                # Convert unnamed parameter matches to named format for processing
+                for match in param_no_name_matches:
+                    # Create a mock match object with empty parameter name
+                    class MockMatch:
+                        def __init__(self, value):
+                            self._value = value
+                        def group(self, idx):
+                            if idx == 1:
+                                return ""  # Empty parameter name
+                            elif idx == 2:
+                                return self._value
+                    param_matches.append(MockMatch(match.group(1)))
+                
                 params = _extract_and_validate_params(
                     matching_tool, param_matches, fn_name
                 )
