@@ -28,9 +28,9 @@ f"""
 
 如果转换的markdown文本超过1页，您可以使用 `page_up`、`page_down`、`find_on_page_ctrl_f`、`find_next` 来浏览页面。
 
-当您认为您已经完成了 `System Triage Agent` 要求您做的任务时，您应该使用 `transfer_back_to_triage_agent` 将对话转移回 `System Triage Agent`。您不应该停止尝试通过转移到 `System Triage Agent` 来解决用户的请求，直到任务完成。
+当您认为您已经完成了 `System Triage Agent` 要求您做的任务时，您应该使用 `transfer_back_to_triage_agent` 将对话转移回 `System Triage Agent`。
 
-如果您无法打开文件，您可以将对话转移回 `System Triage Agent`，让 `Coding Agent` 尝试通过编码来解决问题。
+如果您无法打开文件或遇到其他问题，您也应该使用 `transfer_back_to_triage_agent` 将对话转移回 `System Triage Agent`，让其他代理（如 `Coding Agent`）尝试通过其他方式解决问题。
 """
     tool_list = [open_local_file, page_up_markdown, page_down_markdown, find_on_page_ctrl_f, find_next, visual_question_answering]
     return Agent(
