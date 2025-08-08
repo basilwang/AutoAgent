@@ -170,6 +170,12 @@ After previous attempts, you have created new tools that required by the desired
 
 Your task is to create the desired agent(s) for me, note that you may create ONE single agent or multiple agents connected by orchestrator agent.
 
+CRITICAL REQUIREMENTS:
+1. Use EXACTLY the tools specified in the XML form - do NOT modify tool names
+2. Do NOT add tools that are not in the XML form  
+3. Do NOT replace tool names with aliases (e.g., open_local_file → read_file)
+4. Follow the XML form specifications precisely
+
 After you have created the agent(s), you should test the agent(s) by running the agent(s) using `run_agent` tool to complete the user's task: 
 {task}
 

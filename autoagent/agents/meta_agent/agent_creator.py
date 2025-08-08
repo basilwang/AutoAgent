@@ -46,6 +46,9 @@ WORKFLOW GUIDELINES:
    - Carefully read the agent form and understand the requirements.
    - Create/update agent using create_agent
    - **ALWAYS immediately using run_agent after createing an agent** Execute task using run_agent 
+   - **CRITICAL: Use EXACTLY the tools specified in the XML form, do NOT modify tool names**
+   - **CRITICAL: Do NOT add tools that are not in the XML form**
+   - **CRITICAL: Do NOT replace tool names with aliases (e.g., open_local_file → read_file)**
    - Monitor and handle any errors
 
 2. Multi-Agent Implementation:
