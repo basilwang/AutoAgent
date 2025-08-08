@@ -503,9 +503,27 @@ def _extract_and_validate_params(
 
     # Collect parameters
     found_params = set()
+    
+    # Define parameter aliases for specific function contexts
+    # Only map aliases when they are semantically appropriate
+    param_aliases = {}
+    if fn_name in ['create_directory', 'list_files']:
+        param_aliases = {
+            'directory': 'path',  # For directory operations, directory and path are semantically equivalent
+            'dir': 'path',       # Common abbreviation for directory
+            'folder': 'path',    # Windows-style directory reference
+        }
+    # Note: Removed filepath/file_path mapping as they could refer to files, not directories
+    
     for param_match in param_matches:
-        param_name = param_match.group(1)
+        original_param_name = param_match.group(1)
         param_value = param_match.group(2).strip()
+        
+        # Map alias to actual parameter name if needed
+        param_name = original_param_name
+        if param_name in param_aliases and param_aliases[param_name] in allowed_params:
+            param_name = param_aliases[param_name]
+            print(f"DEBUG: Mapped parameter alias '{original_param_name}' to '{param_name}' for function '{fn_name}'")
 
         # Validate parameter is allowed
         if allowed_params and param_name not in allowed_params:
