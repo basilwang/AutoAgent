@@ -18,7 +18,7 @@ def extract_agents_content(text):
     print(f"输入文本长度: {len(text)} 字符")
     print(f"输入文本前200字符: {text[:200]}")
     
-    pattern = r'(<agents>.*?</agents>)'
+    pattern = r'(<agents>\n.*?</agents>)'
     # re.DOTALL 让 . 也能匹配换行符
     match = re.search(pattern, text, re.DOTALL)
     
