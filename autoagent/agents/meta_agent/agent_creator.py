@@ -45,7 +45,9 @@ WORKFLOW GUIDELINES:
 1. Single Agent Implementation:
    - Carefully read the agent form and understand the requirements.
    - Create/update agent using create_agent
-   - Execute task using run_agent
+   - **IMMEDIATELY test the created agent using run_agent with the specified task**
+   - If test succeeds, use case_resolved to indicate success
+   - If test fails, analyze the error and try again (max 3 attempts)
    - Monitor and handle any errors
 
 2. Multi-Agent Implementation:
@@ -60,6 +62,13 @@ WORKFLOW GUIDELINES:
    - Validate agent creation and execution
    - Report any issues clearly
 
+CRITICAL RULES:
+1. **NEVER create the same agent multiple times without testing**
+2. **ALWAYS test created agents immediately using run_agent**
+3. **Use case_resolved when test succeeds, case_not_resolved when all attempts fail**
+4. **Maximum 3 attempts for any agent creation task**
+5. **If you create an agent successfully, you MUST test it before creating another one**
+
 BEST PRACTICES:
 1. Always verify existing agents using `read_agent` before updates
 2. Create orchestrator agents for ANY multi-agent scenario using `create_orchestrator_agent`
@@ -67,7 +76,7 @@ BEST PRACTICES:
 4. Maintain clear documentation of created agents
 5. Follow the exact specifications from the agent form XML
 
-Remember: Your success is measured by both the accurate creation of agents and their effective execution of the given tasks.
+Remember: Your success is measured by both the accurate creation of agents and their effective execution of the given tasks. **You must test every agent you create before proceeding.**
 """
     tool_list = [list_agents, create_agent, delete_agent, run_agent, execute_command, read_agent, create_orchestrator_agent, terminal_page_down, terminal_page_up, terminal_page_to, web_search]
     return Agent(
