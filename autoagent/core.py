@@ -33,7 +33,7 @@ import inspect
 from constant import MC_MODE, FN_CALL, API_BASE_URL, NOT_SUPPORT_SENDER, ADD_USER, NON_FN_CALL
 from autoagent.fn_call_converter import convert_tools_to_description, convert_non_fncall_messages_to_fncall_messages, SYSTEM_PROMPT_SUFFIX_TEMPLATE, convert_fn_messages_to_non_fn_messages, interleave_user_into_messages
 from litellm.types.utils import Message as litellmMessage
-litellm.set_verbose=True
+litellm.set_verbose=False
 # client = AsyncOpenAI()
 def should_retry_error(exception):
     if MC_MODE is False: print(f"Caught exception: {type(exception).__name__} - {str(exception)}")
@@ -173,7 +173,7 @@ class MetaChain:
             completion_response = completion(**create_params)
         else: 
             # create_model = model_override or agent.model
-            assert agent.tool_choice == "required", f"Non-function calling mode MUST use tool_choice = 'required' rather than {agent.tool_choice}"
+            # assert agent.tool_choice == "required", f"Non-function calling mode MUST use tool_choice = 'required' rather than {agent.tool_choice}"
             last_content = messages[-1]["content"]
             tools_description = convert_tools_to_description(tools)
             messages[-1]["content"] = last_content + "\n[IMPORTANT] You MUST use the tools provided to complete the task.\n" + SYSTEM_PROMPT_SUFFIX_TEMPLATE.format(description=tools_description)
