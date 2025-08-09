@@ -31,15 +31,15 @@ class LocalEnv:
         if platform.system() == "Windows":
             possible_paths.extend([
                 Path(home) / "Anaconda3" / "etc" / "profile.d" / "conda.sh",
+                Path(home) / "miniforge3" / "etc" / "profile.d" / "conda.sh",  # Support miniforge (higher priority)
                 Path(home) / "miniconda3" / "etc" / "profile.d" / "conda.sh",
-                Path(home) / "miniforge3" / "etc" / "profile.d" / "conda.sh",  # Support miniforge
                 Path(home) / "micromamba" / "etc" / "profile.d" / "conda.sh",
             ])
         else:  # Linux and MacOS
             possible_paths.extend([
                 Path(home) / "anaconda3" / "etc" / "profile.d" / "conda.sh",
+                Path(home) / "miniforge3" / "etc" / "profile.d" / "conda.sh",  # Support miniforge (higher priority)
                 Path(home) / "miniconda3" / "etc" / "profile.d" / "conda.sh",
-                Path(home) / "miniforge3" / "etc" / "profile.d" / "conda.sh",  # Support miniforge
                 Path(home) / "micromamba" / "etc" / "profile.d" / "conda.sh",
                 Path("/opt/conda/etc/profile.d/conda.sh"),  # Docker containers
                 Path("/usr/local/conda/etc/profile.d/conda.sh"),
