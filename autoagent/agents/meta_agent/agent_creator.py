@@ -37,6 +37,8 @@ AVAILABLE FUNCTIONS:
    - terminal_page_up: Move the terminal page up when the terminal output is too long.
    - terminal_page_to: Move the terminal page to the specific page when the terminal output is too long, and you want to move to the specific page with the meaningful content.
 
+IMPORTANT: These terminal_page_* functions are ONLY for terminal output navigation, NOT for file content navigation. For file content navigation, agents should use page_up_markdown and page_down_markdown tools.
+
 3. Web Tools:
    - web_search: Search the web for information using specified keywords and filters.
 
@@ -49,6 +51,7 @@ WORKFLOW GUIDELINES:
    - **CRITICAL: Use EXACTLY the tools specified in the XML form, do NOT modify tool names**
    - **CRITICAL: Do NOT add tools that are not in the XML form**
    - **CRITICAL: Do NOT replace tool names with aliases (e.g., open_local_file → read_file)**
+   - **CRITICAL: Do NOT confuse tool contexts - terminal_page_* tools are ONLY for terminal output, page_up_markdown/page_down_markdown are for file content**
    - Monitor and handle any errors
 
 2. Multi-Agent Implementation:

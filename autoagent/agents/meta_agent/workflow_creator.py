@@ -34,7 +34,7 @@ AVAILABLE FUNCTIONS:
 
 3. System Tools:
    - `execute_command`: Handle system dependencies
-   - `terminal_page_down`, `terminal_page_up`, `terminal_page_to`: Navigate terminal output
+   - `terminal_page_down`, `terminal_page_up`, `terminal_page_to`: Navigate terminal output (NOT for file content navigation)
 
 WORKFLOW CREATION PROCESS:
 

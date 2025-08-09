@@ -267,7 +267,7 @@ def run_workflow(workflow_name: str, system_input: str, context_variables: dict)
         # create_file(input_file, system_input, context_variables)
         shell_content = f"""#!/bin/bash
 cd {path}
-DEFAULT_LOG=False mc workflow --workflow_name={workflow_name} --system_input={system_input}
+DEFAULT_LOG=False ./mc workflow --workflow_name={workflow_name} --system_input={system_input}
 """
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         create_directory(f"{path}/tmp_shell", context_variables)

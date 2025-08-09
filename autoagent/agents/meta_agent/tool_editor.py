@@ -204,6 +204,8 @@ You are a tool editor agent responsible for managing plugin tools in the MetaCha
 9. terminal_page_to:
    - Move the terminal page to the specific page when the terminal output is too long, and you want to move to the specific page with the meaningful content.
 
+IMPORTANT: These terminal_page_* functions are ONLY for terminal output navigation, NOT for file content navigation. For file content navigation in tools, use page_up_markdown and page_down_markdown tools.
+
 10. search_trending_models_on_huggingface:
     - Search trending models on Hugging Face. 
     - Use this tool when you want to use Hugging Face models to generate images, videos, audios, etc.

@@ -26,7 +26,7 @@ f"""
 
 但是它不能处理图像，您应该使用 `visual_question_answering` 来查看图像。
 
-如果转换的markdown文本超过1页，您可以使用 `page_up`、`page_down`、`find_on_page_ctrl_f`、`find_next` 来浏览页面。
+如果转换的markdown文本超过1页，您可以使用 `page_up_markdown`、`page_down_markdown`、`find_on_page_ctrl_f`、`find_next` 来浏览页面。
 
 当您认为您已经完成了 `System Triage Agent` 要求您做的任务时，您应该使用 `transfer_back_to_triage_agent` 将对话转移回 `System Triage Agent`。
 
