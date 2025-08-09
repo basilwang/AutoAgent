@@ -32,12 +32,14 @@ class LocalEnv:
             possible_paths.extend([
                 Path(home) / "Anaconda3" / "etc" / "profile.d" / "conda.sh",
                 Path(home) / "miniconda3" / "etc" / "profile.d" / "conda.sh",
+                Path(home) / "miniforge3" / "etc" / "profile.d" / "conda.sh",  # Support miniforge
                 Path(home) / "micromamba" / "etc" / "profile.d" / "conda.sh",
             ])
         else:  # Linux and MacOS
             possible_paths.extend([
                 Path(home) / "anaconda3" / "etc" / "profile.d" / "conda.sh",
                 Path(home) / "miniconda3" / "etc" / "profile.d" / "conda.sh",
+                Path(home) / "miniforge3" / "etc" / "profile.d" / "conda.sh",  # Support miniforge
                 Path(home) / "micromamba" / "etc" / "profile.d" / "conda.sh",
                 Path("/opt/conda/etc/profile.d/conda.sh"),  # Docker containers
                 Path("/usr/local/conda/etc/profile.d/conda.sh"),
@@ -55,19 +57,6 @@ class LocalEnv:
         for path in possible_paths:
             if path.exists():
                 return str(path)
-
-        # 2. Try to find using conda info command
-        try:
-            result = subprocess.run(['conda', 'info', '--base'], 
-                                 capture_output=True, 
-                                 text=True)
-            if result.returncode == 0:
-                base_path = result.stdout.strip()
-                conda_sh = Path(base_path) / "etc" / "profile.d" / "conda.sh"
-                if conda_sh.exists():
-                    return str(conda_sh)
-        except:
-            pass
 
         # 3. If all fails, return None and handle in run_command
         return None
