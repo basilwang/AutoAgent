@@ -241,7 +241,7 @@ r"""
 
 if __name__ == "__main__":
     from autoagent import MetaChain
-    agent = get_agent_former_agent("qwen3:30b-a3b")
+    agent = get_agent_former_agent("ollama/qwen3:30b-a3b")
     client = MetaChain()
     task_yaml = """\
 我想创建两个代理来帮助我完成两种任务：

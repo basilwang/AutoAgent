@@ -84,7 +84,7 @@ def delete_agent(agent_name: str, context_variables):
 
 @register_tool("run_agent")
 @process_terminal_response
-def run_agent(agent_name: str, query: str, ctx_vars: dict, context_variables, model: str = "qwen3:30b-a3b"): 
+def run_agent(agent_name: str, query: str, ctx_vars: dict, context_variables, model: str = "ollama/qwen3:30b-a3b"): 
     """
     Run a plugin agent.
     Args:
