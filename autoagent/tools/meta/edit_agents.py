@@ -89,14 +89,14 @@ def run_agent(agent_name: str, query: str, ctx_vars: dict, context_variables, mo
     Run a plugin agent.
     Args:
         agent_name: The name of the agent.
-        model: The model to be used for the agent. Supported models: claude-3-5-sonnet-20241022. 
+        model: The model to be used for the agent. Supported models: ollama/qwen3:30b-a3b. 
         query: The query to be used for the agent.
         ctx_vars: The global context variables to be used for the agent. It is a dictionary with the key as the variable name and the value as the variable value.
     Returns:
         A string representation of the result of the agent run.
     """
-    # if model not in ["claude-3-5-sonnet-20241022"]:
-    #     return "[ERROR] The model " + model + " is not supported. Supported models: claude-3-5-sonnet-20241022."
+    # if model not in ["ollama/qwen3:30b-a3b"]:
+    #     return "[ERROR] The model " + model + " is not supported. Supported models: ollama/qwen3:30b-a3b."
     env: Union[LocalEnv, DockerEnv] = context_variables.get("code_env", LocalEnv())
     try:
         path = get_metachain_path(env)
@@ -130,7 +130,7 @@ def run_agent(agent_name: str, query: str, ctx_vars: dict, context_variables, mo
         query = shlex.quote(query)
         shell_content = f"""#!/bin/bash
 cd {path}
-DEFAULT_LOG=False auto agent --model={model} --agent_func={agent_func} --query={query} {ctx_vars_str}
+DEFAULT_LOG=False auto agent  --agent_func={agent_func} --query={query} {ctx_vars_str}
 """
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         create_directory(f"{path}/tmp_shell", context_variables)
@@ -412,7 +412,7 @@ if __name__ == "__main__":
 #         if "context_variables" in params["required"]:
 #             params["required"].remove("context_variables")
 #     # response = completion(
-#     #     model="claude-3-5-sonnet-20241022",
+#     #     model="ollama/qwen3:30b-a3b",
 #     #     messages=messages,
 #     #     tools=tools,
 #     #     tool_choice="auto",  # auto is default, but we'll be explicit

@@ -122,7 +122,7 @@ KEY COMPONENTS OF THE FORM:
         </outputs>
         ```
    - listen: Which events trigger this one.
-   - agent: Which agent handles this event. Every agent has the name of the agent, and the exact model of the agent (like `claude-3-5-sonnet-20241022` or others)
+   - agent: Which agent handles this event. Every agent has the name of the agent, and the exact model of the agent (like `ollama/qwen3:30b-a3b` or others)
 
 
 IMPORTANT RULES:
@@ -428,7 +428,7 @@ The form should be:
             </listen>
             <agent>
                 <name>Web Surfer Agent</name>
-                <model>claude-3-5-sonnet-20241022</model>
+                <model>ollama/qwen3:30b-a3b</model>
             </agent>
         </event>
         <event>
@@ -456,7 +456,7 @@ The form should be:
             </listen>
             <agent>
                 <name>Outline Agent</name>
-                <model>claude-3-5-sonnet-20241022</model>
+                <model>ollama/qwen3:30b-a3b</model>
             </agent>
         </event>
         <event>
@@ -498,7 +498,7 @@ The form should be:
             </listen>
             <agent>
                 <name>Evaluator Agent</name>
-                <model>claude-3-5-sonnet-20241022</model>
+                <model>ollama/qwen3:30b-a3b</model>
             </agent>
         </event>
         <event>
@@ -526,7 +526,7 @@ The form should be:
             </listen>
             <agent>
                 <name>Article Writer Agent</name>
-                <model>claude-3-5-sonnet-20241022</model>
+                <model>ollama/qwen3:30b-a3b</model>
             </agent>
         </event>
     </events>
@@ -549,13 +549,13 @@ Follow these examples and guidelines to create appropriate workflow forms based 
 
 if __name__ == "__main__":
     from autoagent import MetaChain
-    agent = get_workflow_former_agent("claude-3-5-sonnet-20241022")
+    agent = get_workflow_former_agent("ollama/qwen3:30b-a3b")
     client = MetaChain()
 #     task_yaml = """\
 # I want to create a workflow that can help me to solving the math problem.
 
 # The workflow should:
-# 2. Parallelize solving the math problem with the same `Math Solver Agent` using different language models (`gpt-4o-2024-08-06`, `claude-3-5-sonnet-20241022`, `deepseek/deepseek-chat`)
+# 2. Parallelize solving the math problem with the same `Math Solver Agent` using different language models (`gpt-4o-2024-08-06`, `ollama/qwen3:30b-a3b`, `deepseek/deepseek-chat`)
 # 3. Aggregate the results from the `Math Solver Agent` and return the final result using majority voting.
 
 # Please create the form of this workflow in the XML format.

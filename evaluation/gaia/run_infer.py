@@ -31,7 +31,7 @@ DATASET_CACHE_DIR = osp.join(osp.dirname(__file__), 'data')
 def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--container_name', type=str, default='gaia_test')
-    parser.add_argument('--model', type=str, default='claude-3-5-sonnet-20241022')
+    parser.add_argument('--model', type=str, default='ollama/qwen3:30b-a3b')
     parser.add_argument('--git_clone', action='store_true', default=False)
     parser.add_argument('--setup_package', type=str, default=None)
     parser.add_argument('--test_pull_name', type=str, default='main')

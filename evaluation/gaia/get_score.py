@@ -4,7 +4,7 @@ import json
 
 def main():
     parser = argparse.ArgumentParser(description="Get agent's gaia score")
-    parser.add_argument('--file', default='/Users/tangjiabin/Documents/reasoning/metachain/evaluation_results/gaia/system_triage_agent/claude-3-5-sonnet-20241022_maxiter/output.jsonl', type=str, help="Path to the agent's output.jsonl")
+    parser.add_argument('--file', default='/Users/tangjiabin/Documents/reasoning/metachain/evaluation_results/gaia/system_triage_agent/ollama/qwen3:30b-a3b_maxiter/output.jsonl', type=str, help="Path to the agent's output.jsonl")
     args = parser.parse_args()
     this_log = args.file
     outs = []
