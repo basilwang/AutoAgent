@@ -49,7 +49,7 @@ def cli():
     pass
 
 @cli.command()
-@click.option('--model', default='gpt-4o-2024-08-06', help='the name of the model')
+@click.option('--model', default='ollama/qwen3:30b-a3b', help='the name of the model')
 @click.option('--agent_func', default='get_dummy_agent', help='the function to get the agent')
 @click.option('--query', default='...', help='the user query to the agent')
 @click.argument('context_variables', nargs=-1)

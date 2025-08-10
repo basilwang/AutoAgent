@@ -130,7 +130,7 @@ def run_agent(agent_name: str, query: str, ctx_vars: dict, context_variables, mo
         query = shlex.quote(query)
         shell_content = f"""#!/bin/bash
 cd {path}
-DEFAULT_LOG=False ./mc agent --model={model} --agent_func={agent_func} --query={query} {ctx_vars_str}
+DEFAULT_LOG=False auto agent --model={model} --agent_func={agent_func} --query={query} {ctx_vars_str}
 """
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         create_directory(f"{path}/tmp_shell", context_variables)
