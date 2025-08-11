@@ -108,7 +108,7 @@ def tool_editing(tool_editor_agent, client, messages, context_variables, agent_f
     MAX_RETRY = 3
 
     if suggestions != "":
-        suggestions = "[IMPORTANT] Here are some suggestions for creating the tools: " + suggestions
+        suggestions = "**CRITICAL** Here are some suggestions for creating the tools: " + suggestions
 
     agents = agent_form.agents
     new_tools = []
@@ -129,7 +129,7 @@ Please create these new tools for me, note that you can NOT stop util you have c
 
 If ALL tools are created and tested successfully, you can stop and use `case_resolved` tool. Otherwise, you should continue to create the tools. After you have tried your best, you can use `case_not_resolved` tool to give the reason why the tool is not created or tested successfully.
 
-[IMPORTANT] ALL tools MUST be tested successfully by running the tools using `run_tool` before you stop.
+ **CRITICAL** ALL tools MUST be tested successfully by running the tools using `run_tool` before you stop.
 """})
     response = client.run(tool_editor_agent, messages, context_variables, debug=debug)
     content = response.messages[-1]["content"]
